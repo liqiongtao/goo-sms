@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"github.com/liqiongtao/goo"
 	"math/rand"
 	"strconv"
 	"time"
@@ -53,18 +53,18 @@ func (ali *gooAliyun) Send(mobile, action string) (string, error) {
 
 	response, err := ali.Client.ProcessCommonRequest(request)
 	if err != nil {
-		log.Println("[aliyun-sms]", "[send-error]", request.String(), err.Error())
+		goo.Log.Error("[aliyun-sms][send-error]", request.String(), err.Error())
 		return "", err
 	}
 
 	rsp := map[string]string{}
 	if err := json.Unmarshal(response.GetHttpContentBytes(), &rsp); err != nil {
-		log.Println("[aliyun-sms]", "[send-error]", request.String(), err.Error())
+		goo.Log.Error("[aliyun-sms][send-error]", request.String(), err.Error())
 		return "", err
 	}
 
 	if rsp["Code"] != "OK" {
-		log.Println("[aliyun-sms]", "[send-error]", request.String(), rsp)
+		goo.Log.Error("[aliyun-sms][send-error]", request.String(), rsp)
 		return "", errors.New(rsp["Message"])
 	}
 
