@@ -20,6 +20,10 @@ func New(sms isms) *gooSms {
 	}
 }
 
+func NewAliyun(conf AliyunConfig) *gooSms {
+	return New(Aliyun(conf))
+}
+
 func (s *gooSms) Send(mobile, action string) (string, error) {
 	if mobile == "" {
 		return "", errors.New("mobile is null")
