@@ -74,14 +74,11 @@ func (ali *gooAliyun) Send(mobile, action string) (string, error) {
 }
 
 func (ali *gooAliyun) Verify(mobile, action, code string) error {
-	rst := __cache.get(ali.conf.Appid, mobile, action)
-	if rst == nil {
+	__code := __cache.get(ali.conf.Appid, mobile, action)
+	if __code == "" {
 		return errors.New("验证码无效")
 	}
-	if rst.ExpireOut < time.Now().Unix() {
-		return errors.New("验证码过期")
-	}
-	if rst.Code != code {
+	if __code != code {
 		return errors.New("验证码错误")
 	}
 	return nil

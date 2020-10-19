@@ -2,40 +2,33 @@ package goo_sms
 
 import (
 	"fmt"
-	"sync"
+	"github.com/go-redis/redis"
 	"time"
 )
 
-var __cache = cache{}
+var __cache *cache
+
+func InitCache(client *redis.Client) {
+	__cache = &cache{
+		redis: client,
+	}
+}
 
 type cache struct {
-	Data sync.Map
+	redis *redis.Client
 }
 
-func (ca cache) set(appid, mobile, action, code string, expireIn int64) {
+func (ca *cache) set(appid, mobile, action, code string, expireIn int64) error {
 	key := fmt.Sprintf("%s_%s_%s", appid, mobile, action)
-	ca.Data.Store(key, &codeInfo{Code: code, ExpireOut: time.Now().Unix() + expireIn})
-	go ca.recovery()
+	return ca.redis.Set(key, code, time.Duration(expireIn)*time.Second).Err()
 }
 
-func (ca cache) get(appid, mobile, action string) *codeInfo {
-	defer func() {
-		go ca.recovery()
-	}()
-
+func (ca *cache) get(appid, mobile, action string) string {
 	key := fmt.Sprintf("%s_%s_%s", appid, mobile, action)
-	rst, ok := ca.Data.Load(key)
-	if !ok {
-		return nil
-	}
-	return rst.(*codeInfo)
+	return ca.redis.Get(key).Val()
 }
 
-func (ca cache) recovery() {
-	ca.Data.Range(func(k, v interface{}) bool {
-		if time.Now().Unix() > v.(*codeInfo).ExpireOut {
-			ca.Data.Delete(k)
-		}
-		return true
-	})
+func (ca *cache) del(appid, mobile, action string) error {
+	key := fmt.Sprintf("%s_%s_%s", appid, mobile, action)
+	return ca.redis.Del(key).Err()
 }
