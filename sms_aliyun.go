@@ -53,18 +53,18 @@ func (ali *gooAliyun) Send(mobile, action string) (string, error) {
 
 	response, err := ali.Client.ProcessCommonRequest(request)
 	if err != nil {
-		goo.Log.Error(request.String(), err.Error())
+		goo.Log.WithField("query-string", request.String()).Error(err.Error())
 		return "", err
 	}
 
 	rsp := map[string]string{}
 	if err := json.Unmarshal(response.GetHttpContentBytes(), &rsp); err != nil {
-		goo.Log.Error(request.String(), err.Error())
+		goo.Log.WithField("query-string", request.String()).Error(err.Error())
 		return "", err
 	}
 
 	if rsp["Code"] != "OK" {
-		goo.Log.Error(request.String(), rsp)
+		goo.Log.WithField("query-string", request.String()).Error(rsp)
 		return "", errors.New(rsp["Message"])
 	}
 
