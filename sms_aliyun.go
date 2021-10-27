@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/liqiongtao/goo"
+	goo_log "github.com/liqiongtao/googo.io/goo-log"
 	"math/rand"
 	"strconv"
 	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 )
@@ -53,18 +52,18 @@ func (ali *gooAliyun) Send(mobile, action string) (string, error) {
 
 	response, err := ali.Client.ProcessCommonRequest(request)
 	if err != nil {
-		goo.Log.WithField("query-string", request.String()).Error(err.Error())
+		goo_log.WithField("query-string", request.String()).Error(err.Error())
 		return "", err
 	}
 
 	rsp := map[string]string{}
 	if err := json.Unmarshal(response.GetHttpContentBytes(), &rsp); err != nil {
-		goo.Log.WithField("query-string", request.String()).Error(err.Error())
+		goo_log.WithField("query-string", request.String()).Error(err.Error())
 		return "", err
 	}
 
 	if rsp["Code"] != "OK" {
-		goo.Log.WithField("query-string", request.String()).Error(rsp)
+		goo_log.WithField("query-string", request.String()).Error(rsp)
 		return "", errors.New(rsp["Message"])
 	}
 
